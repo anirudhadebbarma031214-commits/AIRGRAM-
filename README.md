@@ -54,3 +54,36 @@ The project currently targets the AIRGRAM Supabase project already connected by 
 - Jetpack Compose + Material 3
 - Supabase Auth, Postgres, RLS and Storage
 - GitHub Actions
+
+
+## AIRGRAM Web (Vercel)
+A responsive React + Vite website lives in `web/`. It uses the same AIRGRAM Supabase project as the Android app.
+
+### Deploy to Vercel
+1. Import this GitHub repository in Vercel.
+2. Set **Root Directory** to `web`.
+3. Framework preset: **Vite** (or Other with the same build settings).
+4. Build command: `npm run build`; output directory: `dist`.
+5. Add these environment variables for Production, Preview and Development:
+   - `VITE_SUPABASE_URL` = `https://xocizxszrqiexfxculsa.supabase.co`
+   - `VITE_SUPABASE_ANON_KEY` = the existing Supabase **publishable** key (the same public key used by the Android client)
+   - `VITE_SITE_URL` = the final HTTPS Vercel production URL (optional; when omitted, the current browser origin is used)
+6. Deploy.
+
+### Supabase email confirmation redirects
+After Vercel creates the deployment, open Supabase **Authentication → URL Configuration**:
+- Set **Site URL** to the final production Vercel URL (not `http://localhost:3000`).
+- Add the production URL plus `/auth/callback` to Redirect URLs.
+- Add `https://*-<your-vercel-team>.vercel.app/**` for Vercel preview deployments if you use previews.
+- Keep `http://localhost:5173/**` only for local Vite development.
+- Request a fresh confirmation email after changing settings; expired links cannot be reused.
+
+The web app sends sign-up confirmation and password-reset redirects to `/auth/callback`. The browser client handles Supabase callback sessions. Never put a Supabase secret/service-role key in Vercel client environment variables; only the publishable key belongs in `VITE_SUPABASE_ANON_KEY`.
+
+### Current web features
+- Supabase email/password sign-up, sign-in and password-reset email
+- Confirmation callback handling and clear auth error messages
+- Authenticated public text-post feed, create post and like
+- Responsive dark AIRGRAM layout for desktop and mobile
+
+Photo/video upload, Stories, DMs, Reels editing, calls and live streaming are not implemented in this first web foundation.
