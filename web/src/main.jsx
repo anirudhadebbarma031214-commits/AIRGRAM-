@@ -30,18 +30,8 @@ function App() {
   useEffect(() => {
     if (!supabase) return
     const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''))
-    const code = new URLSearchParams(window.location.search).get('code')
     const authError = hash.get('error_description') || hash.get('error')
     if (authError) setError(decodeURIComponent(authError.replace(/\+/g, ' ')))
-    if (callback && code) {
-      supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
-        if (error) setError(error.message)
-        else {
-          setNotice('Email confirmed. Welcome to AIRGRAM!')
-          window.history.replaceState({}, document.title, '/')
-        }
-      })
-    }
     supabase.auth.getSession().then(({ data }) => setSession(data.session))
     const { data: listener } = supabase.auth.onAuthStateChange((_event, nextSession) => {
       setSession(nextSession)
