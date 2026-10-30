@@ -167,24 +167,7 @@ create policy "airgram comment owner delete" on public.airgram_comments for dele
 create policy "airgram saves private" on public.airgram_saves for select to authenticated using(user_id=(select auth.uid()));
 create policy "airgram save as self" on public.airgram_saves for insert to authenticated with check(user_id=(select auth.uid()));
 create policy "airgram unsave as self" on public.airgram_saves for delete to authenticated using(user_id=(select auth.uid()));
-create table if not exists public.airgram_close_friends (
- owner_id uuid not null references auth.users(id) on delete cascade,
- friend_id uuid not null references auth.users(id) on delete cascade,
- created_at timestamptz not null default now(),
- primary key(owner_id,friend_id), check(owner_id<>friend_id)
-);
-alter table public.airgram_close_friends enable row level security;
-grant select,insert,delete on public.airgram_close_friends to authenticated;
-create policy "airgram close friends private" on public.airgram_close_friends for select to authenticated using(owner_id=(select auth.uid()));
-create policy "airgram close friends add self" on public.airgram_close_friends for insert to authenticated with check(owner_id=(select auth.uid()));
-create policy "airgram close friends remove self" on public.airgram_close_friends for delete to authenticated using(owner_id=(select auth.uid()));
-create policy "airgram stories visible" on public.airgram_stories for select to authenticated using(
- expires_at>now() and (
-  author_id=(select auth.uid()) or audience='public'
-  or (audience='followers' and exists(select 1 from public.airgram_follows f where f.follower_id=(select auth.uid()) and f.followed_id=author_id and f.status='accepted'))
-  or (audience='close_friends' and exists(select 1 from public.airgram_close_friends cf where cf.owner_id=author_id and cf.friend_id=(select auth.uid())))
- )
-);
+create policy "airgram stories visible" on public.airgram_stories for select to authenticated using(expires_at>now() and (audience='public' or author_id=(select auth.uid()) or exists(select 1 from public.airgram_follows f where f.follower_id=(select auth.uid()) and f.followed_id=author_id and f.status='accepted')));
 create policy "airgram story owner insert" on public.airgram_stories for insert to authenticated with check(author_id=(select auth.uid()));
 create policy "airgram story owner delete" on public.airgram_stories for delete to authenticated using(author_id=(select auth.uid()));
 create policy "airgram story views participants" on public.airgram_story_views for select to authenticated using(viewer_id=(select auth.uid()) or exists(select 1 from public.airgram_stories s where s.id=story_id and s.author_id=(select auth.uid())));
