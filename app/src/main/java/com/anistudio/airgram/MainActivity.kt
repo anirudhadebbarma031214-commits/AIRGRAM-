@@ -86,8 +86,8 @@ object AirgramApi {
 
     suspend fun publish(caption: String) = withContext(Dispatchers.IO) {
         val uid = userId ?: throw IllegalStateException("Please sign in again.")
-        val body = JSONArray().put(JSONObject().put("author_id", uid).put("caption", caption).put("visibility", "public").put("status", "published"))
-        request("/rest/v1/airgram_posts", "POST", JSONObject().put("payload", body), true)
+        val body = JSONObject().put("author_id", uid).put("caption", caption).put("visibility", "public").put("status", "published")
+        request("/rest/v1/airgram_posts", "POST", body, true)
     }
 }
 
